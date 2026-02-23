@@ -37,6 +37,29 @@ app.get("/todos", async(req, res) => {
   }
 });
 
+app.delete("/todos/:id", async(req,res) => {
+  try {
+    const todoId = req.params.id;
+    
+    const { data , error } = await supabase
+    .from("Todos")
+    .delete()
+    .eq("id", todoId)
+    .select();
+
+    if (error) throw error
+
+    if (!data || data.length == 0) {
+      return res.status(404).json({ message: "ไม่พบงานที่ต้องการลบ Id อาจจะผิดน้า"});
+    }
+
+    res.json({ message: "ลบงานสำเร็จเรียบร้อยแล้ว!", deletedData: data});
+  } catch (error) {
+    console.log("Error deleting todo:", error);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการลบข้อมูล",error: error.message})
+  }
+})
+
 app.post("/todos", async(req, res) => {
   try {
     const { title } = req.body;
@@ -61,6 +84,27 @@ app.post("/todos", async(req, res) => {
     res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูล", error: error.message})
   }
 });
+
+app.put("/todos/:id" , async(req,res) => {
+  try {
+    const todoId = req.params.id;
+
+    const { is_completed } = req.body;
+
+    const { data, error } = await supabase
+    .from("Todos")
+    .update({ is_completed: is_completed})
+    .eq("id", todoId)
+    .select();
+
+    if (error) throw error;
+
+    res.json({ message: "อัปเดตสถานะสำเร็จ!", data: data});
+  } catch (error) {
+    console.log("Error updating todo:", error);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการอัปเดต", error: error.message})
+  }
+})
 
 app.listen (PORT ,() => {
   console.log(`Server Running on port ${PORT}`);
