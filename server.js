@@ -22,9 +22,18 @@ app.get("/", (req, res) => {
 
 app.get("/todos", async(req, res) => {
   try {
+    const userId = req.query.user_id;
+
+    if (!userId) {
+      return res.status(400).json({message: "ใครเนี้ย ไม่ส่ง user_id มา ดึงข้อมูลไม่ได้นะเครฟฟ"});
+    }
+
     const { data, error } = await supabase
     .from("Todos")
-    .select("*");
+    .select("*")
+    .eq("user_id", userId)
+    .order("id", { ascending: true})
+
 
     if (error) {
       throw error;
@@ -62,26 +71,25 @@ app.delete("/todos/:id", async(req,res) => {
 
 app.post("/todos", async(req, res) => {
   try {
-    const { title } = req.body;
+    const { title, user_id } = req.body;
 
     if (!title) {
-      return res.status(400).json({ message: "กรุณาส่งชื่องาน (title) มาด้วยฮาฟสุดหล่อ!" })
+      return res.status(400).json({ message: "กรุณาส่งชื่องาน (title) มาด้วยฮาฟฟสุดหล่อ!"})
     }
 
     const { data, error } = await supabase
     .from("Todos")
     .insert([
-      { title: title }
+      { title: title, user_id: user_id}
     ])
     .select();
 
     if (error) throw error;
 
-    res.status(201).json({ message: "เพิ่มงานสำเร็จแล้วนะฮาฟ", data: data});
-
+    res.status(201).json({ message: "เพิ่มงานสำเร็จแล้วคร้าบบบ" , data: data});
   } catch (error) {
-    console.log("Error fetching todos:", error);
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูล", error: error.message})
+    console.log("Error inserting todo:", error);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการบันทึกข้อมูล", error: error.message})
   }
 });
 
@@ -89,11 +97,15 @@ app.put("/todos/:id" , async(req,res) => {
   try {
     const todoId = req.params.id;
 
-    const { is_completed } = req.body;
+    const { is_completed, title } = req.body;
+
+    const updateData = {};
+    if(is_completed !== undefined) updateData.is_completed = is_completed;
+    if (title !== undefined) updateData.title = title;
 
     const { data, error } = await supabase
     .from("Todos")
-    .update({ is_completed: is_completed})
+    .update(updateData)
     .eq("id", todoId)
     .select();
 
