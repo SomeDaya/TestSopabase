@@ -97,11 +97,12 @@ app.put("/todos/:id" , async(req,res) => {
   try {
     const todoId = req.params.id;
 
-    const { is_completed, title } = req.body;
+    const { is_completed, title , discription} = req.body;
 
     const updateData = {};
     if(is_completed !== undefined) updateData.is_completed = is_completed;
     if (title !== undefined) updateData.title = title;
+    if (discription !== undefined) updateData.discription = discription;
 
     const { data, error } = await supabase
     .from("Todos")
