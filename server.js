@@ -29,7 +29,7 @@ app.get("/todos", async(req, res) => {
     }
 
     const { data, error } = await supabase
-    .from("Todos")
+    .from("todos")
     .select("*")
     .eq("user_id", userId)
     .order("id", { ascending: true})
@@ -51,7 +51,7 @@ app.delete("/todos/:id", async(req,res) => {
     const todoId = req.params.id;
     
     const { data , error } = await supabase
-    .from("Todos")
+    .from("todos")
     .delete()
     .eq("id", todoId)
     .select();
@@ -78,7 +78,7 @@ app.post("/todos", async(req, res) => {
     }
 
     const { data, error } = await supabase
-    .from("Todos")
+    .from("todos")
     .insert([
       { title: title, user_id: user_id}
     ])
@@ -105,7 +105,7 @@ app.put("/todos/:id" , async(req,res) => {
     if (discription !== undefined) updateData.discription = discription;
 
     const { data, error } = await supabase
-    .from("Todos")
+    .from("todos")
     .update(updateData)
     .eq("id", todoId)
     .select();
